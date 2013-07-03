@@ -3,6 +3,7 @@ Jinja2==2.6
 Werkzeug==0.8.3
 argparse==1.2.1
 cssselect==0.7.1
+gunicorn==0.17.4
 itsdangerous==0.21
 lxml==3.2.1
 pyquery==1.2.4
