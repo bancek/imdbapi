@@ -51,7 +51,7 @@ def movies_info(id):
     data['poster'] = d('#img_primary img').attr('src')
     data['rating'] = d('.star-box-giga-star').text()
     data['rating_count'] = int(d('span[itemprop=ratingCount]').text().replace(',', ''))
-    data['plot_simple'] = d('p[itemprop=description]').text().split(u'See full summary \u00bb')[0].strip()
+    data['plot_simple'] = (d('p[itemprop=description]').text() or '').split(u'See full summary \u00bb')[0].strip()
     data['actors'] = [d(x).text() for x in d('.cast_list span[itemprop=name]')]
     data['rated'] = d('span[itemprop=contentRating]').text()
     data['languages'] = [d(x).text() for x in d('#titleDetails h4:contains("Language:")').siblings('a')]
