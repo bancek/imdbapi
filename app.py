@@ -50,7 +50,7 @@ def movies_info(id):
     data['year'] = int(d('#overview-top h1 .nobr').text().split(u'\u2013')[0].strip('() '))
     data['poster'] = d('#img_primary img').attr('src')
     data['rating'] = d('.star-box-giga-star').text()
-    data['rating_count'] = int(d('span[itemprop=ratingCount]').text().replace(',', ''))
+    data['rating_count'] = int(((d('span[itemprop=ratingCount]').text() or '').replace(',', '') or '0'))
     data['plot_simple'] = (d('p[itemprop=description]').text() or '').split(u'See full summary \u00bb')[0].strip()
     data['actors'] = [d(x).text() for x in d('.cast_list span[itemprop=name]')]
     data['rated'] = d('span[itemprop=contentRating]').text()
