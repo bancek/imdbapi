@@ -3,7 +3,7 @@ from datetime import datetime
 from functools import wraps
 
 from pyquery import PyQuery as pq
-from flask import Flask, jsonify, request, current_app, make_response
+from flask import Flask, jsonify, request, current_app, make_response, url_for
 
 app = Flask(__name__)
 
@@ -48,7 +48,7 @@ def movies_info(id):
 
     data['title'] = d('#overview-top h1 span:eq(0)').text()
     data['year'] = int(d('#overview-top h1 .nobr').text().split(u'\u2013')[0].strip('() '))
-    data['poster'] = '/posters/' + d('#img_primary img').attr('src').split('/')[-1]
+    data['poster'] = url_for('poster_get', name=d('#img_primary img').attr('src').split('/')[-1], _external=True)
     data['rating'] = d('.star-box-giga-star').text()
     data['rating_count'] = int(((d('span[itemprop=ratingCount]').text() or '').replace(',', '') or '0'))
     data['plot_simple'] = (d('p[itemprop=description]').text() or '').split(u'See full summary \u00bb')[0].strip()
