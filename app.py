@@ -3,7 +3,7 @@ from datetime import datetime
 from functools import wraps
 
 from pyquery import PyQuery as pq
-from flask import Flask, jsonify, request, current_app
+from flask import Flask, jsonify, request, current_app, make_response
 
 app = Flask(__name__)
 
@@ -48,7 +48,7 @@ def movies_info(id):
 
     data['title'] = d('#overview-top h1 span:eq(0)').text()
     data['year'] = int(d('#overview-top h1 .nobr').text().split(u'\u2013')[0].strip('() '))
-    data['poster'] = d('#img_primary img').attr('src')
+    data['poster'] = '/posters/' + d('#img_primary img').attr('src').split('/')[-1]
     data['rating'] = d('.star-box-giga-star').text()
     data['rating_count'] = int(((d('span[itemprop=ratingCount]').text() or '').replace(',', '') or '0'))
     data['plot_simple'] = (d('p[itemprop=description]').text() or '').split(u'See full summary \u00bb')[0].strip()
@@ -90,6 +90,20 @@ def movies_info(id):
         data['type'] = 'M'
 
     return jsonify(**data)
+
+@app.route('/posters/<name>')
+def poster_get(name):
+    url = 'http://ia.media-imdb.com/images/M/%s' % name
+
+    req = urllib2.Request(url)
+    req.add_header('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.52 Safari/537.36')
+    resobj = urllib2.urlopen(req).read()
+
+    response = make_response(resobj)
+    response.headers['Content-Type'] = 'image/jpeg'
+    response.headers['Expires'] = 'Sun, 17 Jan 2038 19:40:07 GMT'
+
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True, port=1234) 
