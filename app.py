@@ -1,3 +1,4 @@
+import urllib
 import urllib2
 from datetime import datetime
 from functools import wraps
@@ -25,15 +26,43 @@ def jsonp(func):
 def index():
     return '/movies/:id'
 
+def get_html(url):
+    req = urllib2.Request(url)
+    req.add_header('Accept-Language', 'en-US')
+    req.add_header('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.52 Safari/537.36')
+    return urllib2.urlopen(req).read()
+
+@app.route('/movies/search')
+@jsonp
+def movies_search():
+    q = request.args.get('q')
+
+    url = 'http://www.imdb.com/find?q=%s&s=all' % urllib.quote(q)
+
+    html = get_html(url)
+
+    d = pq(html)
+
+    movies = []
+
+    for section in map(pq, d('.findSection')):
+        if section.find('.findSectionHeader:contains("Titles")'):
+            for result in map(pq, section.find('.findResult')):
+                result_text = result('.result_text')
+                id = result_text.find('a').attr('href').split('/')[2]
+                name = result_text.text().strip()
+                movies.append({'id': id, 'name': name})
+
+    print movies
+
+    return jsonify(movies=movies)
+
 @app.route('/movies/<id>')
 @jsonp
 def movies_info(id):
     url = 'http://www.imdb.com/title/%s/' % id
 
-    req = urllib2.Request(url)
-    req.add_header('Accept-Language', 'en-US')
-    req.add_header('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.52 Safari/537.36')
-    html = urllib2.urlopen(req).read()
+    html = get_html(url)
 
     d = pq(html)
 
