@@ -76,10 +76,20 @@ def movies_info(id):
     data['imdb_url'] = url
 
     data['title'] = d('#overview-top h1 span:eq(0)').text()
-    data['year'] = int(d('#overview-top h1 .nobr').text().split(u'\u2013')[0].strip('() '))
-    data['poster'] = url_for('poster_get', name=d('#img_primary img').attr('src').split('/')[-1], _external=True)
+
+    year = (d('#overview-top h1 .nobr').text() or '').split(u'\u2013')[0].strip('() ')
+
+    if year:
+        data['year'] = int(year)
+
+    data['poster'] = url_for('poster_get', name=(d('#img_primary img').attr('src') or '').split('/')[-1], _external=True)
     data['rating'] = d('.star-box-giga-star').text()
-    data['rating_count'] = int(((d('span[itemprop=ratingCount]').text() or '').replace(',', '') or '0'))
+
+    rating_count = (d('span[itemprop=ratingCount]').text() or '').replace(',', '')
+
+    if rating_count:
+        data['rating_count'] = int(rating_count)
+
     data['plot_simple'] = (d('p[itemprop=description]').text() or '').split(u'See full summary \u00bb')[0].strip()
     data['actors'] = [d(x).text() for x in d('.cast_list span[itemprop=name]')]
     data['rated'] = d('span[itemprop=contentRating]').text()
@@ -96,16 +106,21 @@ def movies_info(id):
     if runtime:
         data['runtime'] = [x.strip() for x in runtime.split('Runtime:')[1].split('|')]
     
-    release_date = ' '.join(tail(d('#titleDetails h4:contains("Release Date:")')).split(' ')[:3])
+    release_date = tail(d('#titleDetails h4:contains("Release Date:")'))
     
     if release_date:
+        release_date = ' '.join(release_date.split(' ')[:3])
+
         if '(' in release_date:
             data['release_date'] = int(release_date.split(' ')[0] + '0000')
         else:
             rd = datetime.strptime(release_date, '%d %B %Y').date()
             data['release_date'] = int('%.2d%.2d%.2d' % (rd.year, rd.month, rd.day))
 
-    movie_type = d('.infobar')[0].text.split('-')[0].strip()
+    movie_type = d('.infobar')
+
+    if movie_type:
+        movie_type = movie_type[0].text.split('-')[0].strip()
 
     if movie_type == 'TV Series':
         data['type'] = 'TVS'
