@@ -111,11 +111,14 @@ def movies_info(id):
     if release_date:
         release_date = ' '.join(release_date.split(' ')[:3])
 
-        if '(' in release_date:
-            data['release_date'] = int(release_date.split(' ')[0] + '0000')
-        else:
-            rd = datetime.strptime(release_date, '%d %B %Y').date()
-            data['release_date'] = int('%.2d%.2d%.2d' % (rd.year, rd.month, rd.day))
+        try:
+            if '(' in release_date:
+                data['release_date'] = int(release_date.split(' ')[0] + '0000')
+            else:
+                rd = datetime.strptime(release_date, '%d %B %Y').date()
+                data['release_date'] = int('%.2d%.2d%.2d' % (rd.year, rd.month, rd.day))
+        except:
+            pass
 
     movie_type = d('.infobar')
 
